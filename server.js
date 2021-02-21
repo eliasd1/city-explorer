@@ -9,13 +9,20 @@ require("dotenv").config()
 const PORT = process.env.PORT
 app.use(cors());
 
+
 app.get("/location", handleLocation);
 
 app.get("/weather", handleWeather);
 
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+  })
+
 app.listen(PORT, ()=>{
     console.log("Listening on port " + PORT);
 })
+
 
 function CityLocation(searchQuery, displayName, lat, lon){
     this.search_query = searchQuery;
@@ -29,8 +36,14 @@ function Weather(forecast, time){
 }
 function handleLocation(req, res){
     let searchQuery = req.query.city;
-    let locationObject = getLocationData(searchQuery);
-    res.status(200).send(locationObject);
+    let regex = /^[a-zA-Z\s]*$/g
+    if(searchQuery === undefined || !regex.test(searchQuery)){
+        res.status(500).send(errorHandler())
+    } else{
+        let locationObject = getLocationData(searchQuery);
+        res.status(200).send(locationObject);
+    }
+    
 }
 
 function getLocationData(searchQuery){
@@ -53,4 +66,11 @@ function getWeatherData(){
         weatherArr.push(new Weather(day.weather.description, new Date(day.datetime).toDateString()));
     })
     return weatherArr;
+}
+
+function errorHandler(){
+    return{
+        status:500,
+        textResponse: "Sorry, something went wrong"
+    }
 }
