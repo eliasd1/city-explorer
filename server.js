@@ -11,6 +11,7 @@ app.use(cors());
 
 app.get("/location", handleLocation);
 
+app.get("/weather", handleWeather);
 
 app.listen(PORT, ()=>{
     console.log("Listening on port " + PORT);
@@ -21,6 +22,10 @@ function CityLocation(searchQuery, displayName, lat, lon){
     this.formatted_query = displayName;
     this.latitude = lat;
     this.longitude = lon;
+}
+function Weather(forecast, time){
+    this.forecast = forecast;
+    this.time = time;
 }
 function handleLocation(req, res){
     let searchQuery = req.query.city;
@@ -35,4 +40,17 @@ function getLocationData(searchQuery){
     let displayName = locationData[0].display_name;
     let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
     return responseObject;
+}
+
+function handleWeather(req, res){
+    res.status(200).send(getWeatherData());
+}
+
+function getWeatherData(){
+    let weatherData = require("./data/weather.json").data;
+    let weatherArr = []
+    weatherData.forEach(day =>{
+        weatherArr.push(new Weather(day.weather.description, new Date(day.datetime).toDateString()));
+    })
+    return weatherArr;
 }
