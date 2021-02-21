@@ -36,7 +36,7 @@ function Weather(forecast, time){
 }
 function handleLocation(req, res){
     let searchQuery = req.query.city;
-    let regex = /^[a-zA-Z\s]*$/g
+    let regex = /\b^[a-zA-Z\s]*$/g
     if(searchQuery === undefined || !regex.test(searchQuery)){
         res.status(500).send(errorHandler())
     } else{
@@ -56,7 +56,13 @@ function getLocationData(searchQuery){
 }
 
 function handleWeather(req, res){
-    res.status(200).send(getWeatherData());
+    let searchQuery = req.query.city;
+    let regex = /'b^[a-zA-Z\s]*$/g
+    if(searchQuery === undefined || !regex.test(searchQuery)){
+        res.status(500).send(errorHandler())
+    }else{
+        res.status(200).send(getWeatherData());
+    }
 }
 
 function getWeatherData(){
