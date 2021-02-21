@@ -1,10 +1,13 @@
 'use strict'
 
 let express = require('express')
+let cors = require("cors");
+
 let app = express();
 require("dotenv").config()
 
 const PORT = process.env.PORT
+app.use(cors());
 
 app.get("/location", handleLocation);
 
@@ -29,7 +32,7 @@ function getLocationData(searchQuery){
     let locationData = require("./data/location.json");
     let latitude = locationData[0].lat;
     let longitude = locationData[0].lon;
-    let displayName = location[0].display_name;
-    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude )
-    return resposneObject;
+    let displayName = locationData[0].display_name;
+    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
+    return responseObject;
 }
