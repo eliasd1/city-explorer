@@ -14,6 +14,8 @@ app.get("/location", handleLocation);
 
 app.get("/weather", handleWeather);
 
+app.get("/parks", handleParks)
+
 app.get("*", handle404);
 
 app.listen(PORT, () => {
@@ -31,6 +33,14 @@ function Weather(forecast, time) {
     this.forecast = forecast;
     this.time = time;
 }
+function Park(name, address, fee, description, url){
+    this.name = name;
+    this.address = address;
+    this.fee = fee;
+    this.description = description;
+    this.url = url;
+}
+
 function handleLocation(req, res) {
     try {
         let searchQuery = req.query.city;
@@ -42,6 +52,18 @@ function handleLocation(req, res) {
     }
 }
 
+function handleWeather(req, res) {
+    getWeatherData(req.query.latitude, req.query.longitude).then(data => {
+        res.status(200).send(data)
+    })
+}
+
+function handleParks(req,res){
+    getParksData(req.query.search_query).then(data =>{
+        res.status(200).send(data);
+    })
+}
+
 function getLocationData(searchQuery) {
     let url = "https://eu1.locationiq.com/v1/search.php"
     const query = {
@@ -51,7 +73,6 @@ function getLocationData(searchQuery) {
         format: "json"
     }
     return superagent.get(url).query(query).then(data => {
-        console.log(data.body);
         try {
             let latitude = data.body[0].lat;
             let longitude = data.body[0].lon;
@@ -65,11 +86,7 @@ function getLocationData(searchQuery) {
     }).catch(error => console.log(error))
 }
 
-function handleWeather(req, res) {
-    getWeatherData(req.query.latitude, req.query.longitude).then(data => {
-        res.status(200).send(data)
-    })
-}
+
 
 function getWeatherData(lat, lon) {
     let url = "https://api.weatherbit.io/v2.0/forecast/daily"
@@ -85,6 +102,23 @@ function getWeatherData(lat, lon) {
             console.log("Something is wrong")
         }
     }).catch(error => console.log(error));
+}
+
+function getParksData(searchQuery){
+    let url = "https://developer.nps.gov/api/v1/parks"
+    const query = {
+        q: searchQuery,
+        api_key: process.env.PARKS_API_KEY
+    }
+    return superagent.get(url).query(query).then(parks =>{
+        try{
+            return parks.body.data.map(park =>{
+                return new Park(park.fullName, `${park.addresses[0].line1}, ${park.addresses[0].city}, ${park.addresses[0].stateCode} ${park.addresses[0].postalCode}`, "0.00" , park.description, park.url)
+            })
+        } catch{
+            console.log("Something went wrong here")
+        }
+    }).catch(error => console.log(error))
 }
 function errorHandler() {
     return {
