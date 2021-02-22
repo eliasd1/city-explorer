@@ -2,6 +2,7 @@
 
 **Author**: Elias Dadoush
 **Version**: 1.0.0
+**Version**:1.5.0 - refactored code for /location and /weather endpoints and added a /parks path
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -56,6 +57,47 @@ Finish time: 5:25PM
 
 Actual time needed to complete: 1 hour
 
+### Lab 07
+
+Number and name of feature: #1 Data Formatting
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 1:50PM
+
+Finish time: 2:40PM
+
+Actual time needed to complete: Almost an hour
+
+Number and name of feature: #2 Refactor Locations
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 2:45PM
+
+Finish time: 3:30PM
+
+Actual time needed to complete: 45 minutes
+
+Number and name of feature: #3 Refactor Weather
+
+Estimate of time needed to complete: 30 minutes
+
+Start time: 3:35PM
+
+Finish time: 4:05PM
+
+Actual time needed to complete: 30 minutes
+
+Number and name of feature: #4 Errors
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 4:05PM
+
+Finish time: 4:40PM
+
+Actual time needed to complete: 35 minutes
 
 ## Credits and Collaborations
 <!-- Give credit (and a link) to other people or resources that helped you build this application. -->
