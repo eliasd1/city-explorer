@@ -47,7 +47,7 @@ function getLocationData(searchQuery) {
     const query = {
         key: process.env.GEO_CODE_KEY,
         q: searchQuery,
-        limit:1,
+        limit: 1,
         format: "json"
     }
     return superagent.get(url).query(query).then(data => {
@@ -58,15 +58,15 @@ function getLocationData(searchQuery) {
             let displayName = data.body[0].display_name;
             let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
             return responseObject;
-        } catch{
+        } catch {
             console.log("Somethhing is wrong")
         }
-        
+
     }).catch(error => console.log(error))
 }
 
 function handleWeather(req, res) {
-    getWeatherData(req.query.latitude, req.query.longitude).then(data =>{
+    getWeatherData(req.query.latitude, req.query.longitude).then(data => {
         res.status(200).send(data)
     })
 }
@@ -77,11 +77,11 @@ function getWeatherData(lat, lon) {
         lat: lat,
         lon: lon,
         key: process.env.WEATHER_API_KEY,
-    } 
-    return superagent.get(url).query(query).then(weatherObj =>{
-        try{
+    }
+    return superagent.get(url).query(query).then(weatherObj => {
+        try {
             return weatherObj.body.data.map(day => new Weather(day.weather.description, new Date(day.datetime).toDateString()));
-        } catch{
+        } catch {
             console.log("Something is wrong")
         }
     }).catch(error => console.log(error));
