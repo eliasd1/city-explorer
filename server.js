@@ -14,10 +14,7 @@ app.get("/location", handleLocation);
 
 app.get("/weather", handleWeather);
 
-app.use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-  })
+app.get("*", handle404);
 
 app.listen(PORT, ()=>{
     console.log("Listening on port " + PORT);
@@ -63,11 +60,7 @@ function handleWeather(req, res){
 
 function getWeatherData(){
     let weatherData = require("./data/weather.json").data;
-    let weatherArr = []
-    weatherData.forEach(day =>{
-        weatherArr.push(new Weather(day.weather.description, new Date(day.datetime).toDateString()));
-    })
-    return weatherArr;
+    return weatherData.map(day => new Weather(day.weather.description, new Date(day.datetime).toDateString()));
 }
 
 function errorHandler(){
@@ -75,4 +68,7 @@ function errorHandler(){
         status:500,
         textResponse: "Sorry, something went wrong"
     }
+}
+function handle404(){
+    res.status(404).send("Path noth found");
 }
