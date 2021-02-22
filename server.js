@@ -46,7 +46,7 @@ function getLocationData(searchQuery) {
     // let locationData = require("./data/location.json");
     let url = "https://eu1.locationiq.com/v1/search.php"
     const query = {
-        key: "pk.209064f9aa7b785b3424424746f0ef4d",
+        key: process.env.GEO_CODE_KEY,
         q: searchQuery,
         limit:1,
         format: "json"
