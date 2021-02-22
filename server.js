@@ -43,7 +43,6 @@ function handleLocation(req, res) {
 }
 
 function getLocationData(searchQuery) {
-    // let locationData = require("./data/location.json");
     let url = "https://eu1.locationiq.com/v1/search.php"
     const query = {
         key: process.env.GEO_CODE_KEY,
@@ -67,24 +66,32 @@ function getLocationData(searchQuery) {
 }
 
 function handleWeather(req, res) {
-    try {
-        res.status(200).send(getWeatherData())
-    } catch {
-        res.status(500).send(errorHandler())
-    }
+    getWeatherData(req.query.latitude, req.query.longitude).then(data =>{
+        res.status(200).send(data)
+    })
 }
 
-function getWeatherData() {
-    let weatherData = require("./data/weather.json").data;
-    return weatherData.map(day => new Weather(day.weather.description, new Date(day.datetime).toDateString()));
+function getWeatherData(lat, lon) {
+    let url = "https://api.weatherbit.io/v2.0/forecast/daily"
+    const query = {
+        lat: lat,
+        lon: lon,
+        key: process.env.WEATHER_API_KEY,
+    } 
+    return superagent.get(url).query(query).then(weatherObj =>{
+        try{
+            return weatherObj.body.data.map(day => new Weather(day.weather.description, new Date(day.datetime).toDateString()));
+        } catch{
+            console.log("Something is wrong")
+        }
+    }).catch(error => console.log(error));
 }
-
 function errorHandler() {
     return {
         status: 500,
         textResponse: "Sorry, something went wrong"
     }
 }
-function handle404() {
-    res.status(404).send("Path noth found");
+function handle404(req, res) {
+    res.status(404).send("Path not found");
 }
