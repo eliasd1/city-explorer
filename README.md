@@ -2,7 +2,8 @@
 
 **Author**: Elias Dadoush
 **Version**: 1.0.0
-**Version**:1.5.0 - refactored code for /location and /weather endpoints and added a /parks path
+**Version**:1.2.0 - refactored code for /location and /weather endpoints and added a /parks path
+**Version**: 1.5.0 - added cache system
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -23,6 +24,8 @@ Packages: express, dotenv, cors
 - Refactored code for/location and/weather endpoints and added a /parks path
 
 - Created a database named city_explorer that contains a table with city information
+
+- Added the ability to cache data
 
 ### Lab -06
 
@@ -107,6 +110,35 @@ Start time: 4:05PM
 Finish time: 4:40PM
 
 Actual time needed to complete: 35 minutes
+
+### Lab 08
+
+Number and name of feature: #1 Create Database
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 2:40PM
+
+Finish time: 3:10PM
+Actual time needed to complete: 30 minutes
+
+Number and name of feature: #2 Deploy Database
+
+Estimate of time needed to complete: 2 hour
+
+Start time: 3:10PM
+
+Finish time: 4:25PM
+Actual time needed to complete: 1 hour and 15 minutes
+
+Number and name of feature: #3 Deploy on Heroku
+
+Estimate of time needed to complete: 30 minutes
+
+Start time: 4:25PM
+
+Finish time: 4:50PM
+Actual time needed to complete: 25 minutes
 
 ## Credits and Collaborations
 <!-- Give credit (and a link) to other people or resources that helped you build this application. -->
