@@ -11,7 +11,7 @@ This application serves as an API server which provides data about location and 
 ## Getting Started
 
 <!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
-A user must install the dependencies using npm install and then he/she can start the server by typing node server.js in the terminal. 
+A user must install the dependencies using npm install and then he/she can start the server by typing node server.js in the terminal.
 
 ## Architecture
 <!-- Provide a detailed description of the application design. What technologies (languages, libraries, etc) you're using, and any other relevant design information. -->
