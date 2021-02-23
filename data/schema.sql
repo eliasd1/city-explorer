@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS
 city(
     id SERIAL PRIMARY KEY NOT NULL,
     city_name VARCHAR(256) NOT NULL,
-    latitude INT NOT NULL,
-    longitude INT NOT NULL
+    display_name VARCHAR(256) NOT NULL,
+    latitude VARCHAR(256) NOT NULL,
+    longitude VARCHAR(256) NOT NULL
 );

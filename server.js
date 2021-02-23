@@ -68,25 +68,39 @@ function handleParks(req, res) {
 }
 
 function getLocationData(searchQuery) {
-    let url = "https://eu1.locationiq.com/v1/search.php"
-    const query = {
-        key: process.env.GEO_CODE_KEY,
-        q: searchQuery,
-        limit: 1,
-        format: "json"
-    }
-    return superagent.get(url).query(query).then(data => {
-        try {
-            let latitude = data.body[0].lat;
-            let longitude = data.body[0].lon;
-            let displayName = data.body[0].display_name;
-            let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
-            return responseObject;
-        } catch {
-            console.log("Somethhing is wrong")
-        }
+    const searchValue = [searchQuery];
+    let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
+    return client.query(dbFindQuery, searchValue).then(data =>{
+        if(data.rows.length > 0){
+            return new CityLocation(data.rows[0].city_name, data.rows[0].display_name, data.rows[0].latitude, data.rows[0].longitude);
+        } else{
+            let url = "https://eu1.locationiq.com/v1/search.php"
+            const query = {
+                key: process.env.GEO_CODE_KEY,
+                q: searchQuery,
+                limit: 1,
+                format: "json"
+            }
+            return superagent.get(url).query(query).then(data => {
+                try {
+                    let latitude = data.body[0].lat;
+                    let longitude = data.body[0].lon;
+                    let displayName = data.body[0].display_name;
+                    let safeValues = [searchQuery, displayName,latitude, longitude]
+                    let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4);`;
+                    client.query(dbAddQuery, safeValues).then(data =>{
+                        console.log("Data bas been added ", data)
+                    }).catch(error => console.log(error));
+                    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
+                    return responseObject;
+                } catch {
+                    console.log("Somethhing is wrong")
+                }
 
+            }).catch(error => console.log(error))
+        }
     }).catch(error => console.log(error))
+    
 }
 
 
