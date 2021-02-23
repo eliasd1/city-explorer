@@ -2,7 +2,8 @@
 
 **Author**: Elias Dadoush
 **Version**: 1.0.0
-**Version**:1.5.0 - refactored code for /location and /weather endpoints and added a /parks path
+**Version**:1.2.0 - refactored code for /location and /weather endpoints and added a /parks path
+**Version**: 1.5.0 - added cache system
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -23,6 +24,8 @@ Packages: express, dotenv, cors
 - Refactored code for/location and/weather endpoints and added a /parks path
 
 - Created a database named city_explorer that contains a table with city information
+
+- Added the ability to cache data
 
 ### Lab -06
 
