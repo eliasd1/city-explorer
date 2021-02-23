@@ -4,9 +4,11 @@ let express = require('express');
 let cors = require("cors");
 let superagent = require("superagent");
 let app = express();
+let pg = require("pg");
 require("dotenv").config()
 
 const PORT = process.env.PORT
+let client = new pg.Client(process.env.DATABASE_URL);
 app.use(cors());
 
 
@@ -18,10 +20,11 @@ app.get("/parks", handleParks)
 
 app.get("*", handle404);
 
-app.listen(PORT, () => {
-    console.log("Listening on port " + PORT);
+client.connect().then(() => {
+    app.listen(PORT, () => {
+        console.log("Listening on port " + PORT);
+    })
 })
-
 
 function CityLocation(searchQuery, displayName, lat, lon) {
     this.search_query = searchQuery;
@@ -33,7 +36,7 @@ function Weather(forecast, time) {
     this.forecast = forecast;
     this.time = time;
 }
-function Park(name, address, fee, description, url){
+function Park(name, address, fee, description, url) {
     this.name = name;
     this.address = address;
     this.fee = fee;
@@ -58,8 +61,8 @@ function handleWeather(req, res) {
     })
 }
 
-function handleParks(req,res){
-    getParksData(req.query.search_query).then(data =>{
+function handleParks(req, res) {
+    getParksData(req.query.search_query).then(data => {
         res.status(200).send(data);
     })
 }
@@ -104,18 +107,18 @@ function getWeatherData(lat, lon) {
     }).catch(error => console.log(error));
 }
 
-function getParksData(searchQuery){
+function getParksData(searchQuery) {
     let url = "https://developer.nps.gov/api/v1/parks"
     const query = {
         q: searchQuery,
         api_key: process.env.PARKS_API_KEY
     }
-    return superagent.get(url).query(query).then(parks =>{
-        try{
-            return parks.body.data.map(park =>{
-                return new Park(park.fullName, `${park.addresses[0].line1}, ${park.addresses[0].city}, ${park.addresses[0].stateCode} ${park.addresses[0].postalCode}`, "0.00" , park.description, park.url)
+    return superagent.get(url).query(query).then(parks => {
+        try {
+            return parks.body.data.map(park => {
+                return new Park(park.fullName, `${park.addresses[0].line1}, ${park.addresses[0].city}, ${park.addresses[0].stateCode} ${park.addresses[0].postalCode}`, "0.00", park.description, park.url)
             })
-        } catch{
+        } catch {
             console.log("Something went wrong here")
         }
     }).catch(error => console.log(error))

@@ -1,0 +1,9 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+CREATE TABLE IF NOT EXISTS
+city(
+    id SERIAL PRIMARY KEY NOT NULL,
+    city_name VARCHAR(256) NOT NULL,
+    latitude INT NOT NULL,
+    longitude INT NOT NULL
+);
