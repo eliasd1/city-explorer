@@ -4,7 +4,7 @@
 **Version**: 1.0.0
 **Version**:1.2.0 - refactored code for /location and /weather endpoints and added a /parks path
 **Version**: 1.5.0 - added cache system
-
+**Version** 2.0.0 - add /movies and /yelp path
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
 This application serves as an API server which provides data about location and weather of the request city. It handles get requests and depending on the request parameter, it returns a certain response.
@@ -17,7 +17,7 @@ A user must install the dependencies using npm install and then he/she can start
 ## Architecture
 <!-- Provide a detailed description of the application design. What technologies (languages, libraries, etc) you're using, and any other relevant design information. -->
 Languages: NodeJS for backend code
-Packages: express, dotenv, cors
+Packages: express, dotenv, cors, superagent
 
 ## Change Log
 
@@ -26,6 +26,10 @@ Packages: express, dotenv, cors
 - Created a database named city_explorer that contains a table with city information
 
 - Added the ability to cache data
+
+- Refactored the location handler function
+
+- Add /movies and /yelp paths
 
 ### Lab -06
 
@@ -139,6 +143,44 @@ Start time: 4:25PM
 
 Finish time: 4:50PM
 Actual time needed to complete: 25 minutes
+
+### Lab 09
+
+Number and name of feature: #1 Refactor location handler function
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 1:30PM
+Finish time: 3:00PM
+
+Actual time needed to complete:1 hour and a half
+
+Number and name of feature: #2 Add Movie path
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 3:10PM
+Finish time: 4:10PM
+
+Actual time needed to complete: 1 hour
+
+Number and name of feature: #3 Add Yelp path
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 4:10PM
+Finish time: 5:10PM
+
+Actual time needed to complete: 1 hour
+
+Number and name of feature: #4 Modify Yelp Path path
+
+Estimate of time needed to complete: 1 hour
+
+Start time: 5:10PM
+Finish time: 5:50PM
+
+Actual time needed to complete: 40 minutes
 
 ## Credits and Collaborations
 <!-- Give credit (and a link) to other people or resources that helped you build this application. -->
