@@ -8,7 +8,8 @@ let pg = require("pg");
 require("dotenv").config()
 app.use(cors());
 const PORT = process.env.PORT
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
+// let clientParameter = { connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } }
+const client = new pg.Client(process.env.DATABASE_URL);
 
 
 
@@ -24,13 +25,13 @@ client.connect().then(() => {
     app.listen(PORT, () => {
         console.log("Listening on port " + PORT);
     })
-})
+}).catch(error => console.log("error occured ", error))
 
-function CityLocation(searchQuery, displayName, lat, lon) {
-    this.search_query = searchQuery;
-    this.formatted_query = displayName;
-    this.latitude = lat;
-    this.longitude = lon;
+function CityLocation(locationData) {
+    this.search_query = locationData.city_name;
+    this.formatted_query = locationData.display_name;
+    this.latitude = locationData.latitude;
+    this.longitude = locationData.longitude;
 }
 function Weather(forecast, time) {
     this.forecast = forecast;
@@ -68,11 +69,12 @@ function handleParks(req, res) {
 }
 
 function getLocationData(searchQuery) {
-    const searchValue = [searchQuery];
+    let searchValue = [searchQuery];
     let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
     return client.query(dbFindQuery, searchValue).then(data =>{
+        
         if(data.rows.length > 0){
-            return new CityLocation(data.rows[0].city_name, data.rows[0].display_name, data.rows[0].latitude, data.rows[0].longitude);
+            return new CityLocation(data.rows[0]);
         } else{
             let url = "https://eu1.locationiq.com/v1/search.php"
             const query = {
@@ -83,16 +85,11 @@ function getLocationData(searchQuery) {
             }
             return superagent.get(url).query(query).then(data => {
                 try {
-                    let latitude = data.body[0].lat;
-                    let longitude = data.body[0].lon;
-                    let displayName = data.body[0].display_name;
-                    let safeValues = [searchQuery, displayName,latitude, longitude]
-                    let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4);`;
-                    client.query(dbAddQuery, safeValues).then(data =>{
-                        console.log("Data bas been added ", data)
+                    let safeValues = [searchQuery, data.body[0].display_name, data.body[0].lat, data.body[0].lon]
+                    let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4) RETURNING *;`;
+                    return client.query(dbAddQuery, safeValues).then(data =>{
+                        return new CityLocation(data.rows[0]);
                     }).catch(error => console.log(error));
-                    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
-                    return responseObject;
                 } catch {
                     console.log("Somethhing is wrong")
                 }
