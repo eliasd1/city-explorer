@@ -8,8 +8,8 @@ let pg = require("pg");
 require("dotenv").config()
 app.use(cors());
 const PORT = process.env.PORT
-
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
+// { connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } }
+const client = new pg.Client(process.env.DATABASE_URL);
 
 
 
@@ -20,6 +20,8 @@ app.get("/weather", handleWeather);
 app.get("/parks", handleParks)
 
 app.get("/movies", handleMovies)
+
+app.get("/yelp", handleYelp)
 
 app.get("*", handle404);
 
@@ -46,13 +48,21 @@ function Park(name, address, fee, description, url) {
     this.description = description;
     this.url = url;
 }
-function Movie(title, overview, average_votes, image_url, popularity, released_on){
-    this.title = title;
-    this.overview = overview;
-    this.average_votes = average_votes;
-    this.image_url = "https://image.tmdb.org/t/p/w500" + image_url;
-    this.popularity = popularity;
-    this.released_on = released_on;
+function Movie(movieData){
+    this.title = movieData.title;
+    this.overview =movieData.overview;
+    this.average_votes = movieData.average_votes;
+    this.image_url = "https://image.tmdb.org/t/p/w500" + movieData.image_url;
+    this.popularity = movieData.popularity;
+    this.released_on = movieData.released_on;
+}
+
+function Business(businessData){
+    this.name = businessData.name;
+    this.image_url = businessData.image_url;
+    this.price = businessData.price;
+    this.rating = businessData.rating;
+    this.url = businessData.url;
 }
 
 function handleLocation(req, res) {
@@ -82,6 +92,11 @@ function handleMovies(req, res){
         res.status(200).send(data);
     })
 }
+function handleYelp(req,res){
+    getYelpData(req.query.search_query).then(data =>{
+        res.status(200).send(data)
+    })
+}
 function getLocationData(searchQuery) {
     return checkIfExists(searchQuery).then(data =>{
         if(data){
@@ -95,7 +110,6 @@ function checkIfExists(searchQuery){
     let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
     return client.query(dbFindQuery, [searchQuery]).then(data =>{
         if(data.rows.length > 0){
-            console.log("FROM DATABASE")
             return new CityLocation(data.rows[0]);
         }
     }).catch(error => console.log(error))
@@ -164,12 +178,23 @@ function getMoviesData(searchQuery){
 
     return superagent.get(url).query(query).then(movies =>{
         try{
-            return movies.body.results.map(movie => new Movie(movie.title, movie.overview, movie.vote_average, movie.poster_path, movie.popularity, movie.release_date))
+            return movies.body.results.map(movie => new Movie(movie))
         } catch{
             console.log("Something went wrong")
         }
     }).catch(error => console.log(error));
 }
+
+function getYelpData(searchQuery){
+    let url = "https://api.yelp.com/v3/businesses/search"
+    const query = {
+        location: searchQuery
+    }
+    return superagent.get(url).set("Authorization", `Bearer ${process.env.YELP_API_KEY}`).query(query).then(data =>{
+        return data.body.businesses.map(business => new Business(business))
+    }).catch(error => console.log(error))
+}
+
 
 function errorHandler() {
     return {
