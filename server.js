@@ -8,7 +8,8 @@ let pg = require("pg");
 require("dotenv").config()
 app.use(cors());
 const PORT = process.env.PORT
-const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
+// let clientParameter = { connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } }
+const client = new pg.Client(process.env.DATABASE_URL);
 
 
 
@@ -18,19 +19,21 @@ app.get("/weather", handleWeather);
 
 app.get("/parks", handleParks)
 
+app.get("/movies", handleMovies)
+
 app.get("*", handle404);
 
 client.connect().then(() => {
     app.listen(PORT, () => {
         console.log("Listening on port " + PORT);
     })
-})
+}).catch(error => console.log("error occured ", error))
 
-function CityLocation(searchQuery, displayName, lat, lon) {
-    this.search_query = searchQuery;
-    this.formatted_query = displayName;
-    this.latitude = lat;
-    this.longitude = lon;
+function CityLocation(locationData) {
+    this.search_query = locationData.city_name;
+    this.formatted_query = locationData.display_name;
+    this.latitude = locationData.latitude;
+    this.longitude = locationData.longitude;
 }
 function Weather(forecast, time) {
     this.forecast = forecast;
@@ -42,6 +45,14 @@ function Park(name, address, fee, description, url) {
     this.fee = fee;
     this.description = description;
     this.url = url;
+}
+function Movie(title, overview, average_votes, image_url, popularity, released_on){
+    this.title = title;
+    this.overview = overview;
+    this.average_votes = average_votes;
+    this.image_url = "https://image.tmdb.org/t/p/w500" + image_url;
+    this.popularity = popularity;
+    this.released_on = released_on;
 }
 
 function handleLocation(req, res) {
@@ -66,44 +77,49 @@ function handleParks(req, res) {
         res.status(200).send(data);
     })
 }
-
+function handleMovies(req, res){
+    getMoviesData(req.query.search_query).then(data =>{
+        res.status(200).send(data);
+    })
+}
 function getLocationData(searchQuery) {
-    const searchValue = [searchQuery];
-    let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
-    return client.query(dbFindQuery, searchValue).then(data =>{
-        if(data.rows.length > 0){
-            return new CityLocation(data.rows[0].city_name, data.rows[0].display_name, data.rows[0].latitude, data.rows[0].longitude);
-        } else{
-            let url = "https://eu1.locationiq.com/v1/search.php"
-            const query = {
-                key: process.env.GEO_CODE_KEY,
-                q: searchQuery,
-                limit: 1,
-                format: "json"
-            }
-            return superagent.get(url).query(query).then(data => {
-                try {
-                    let latitude = data.body[0].lat;
-                    let longitude = data.body[0].lon;
-                    let displayName = data.body[0].display_name;
-                    let safeValues = [searchQuery, displayName,latitude, longitude]
-                    let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4);`;
-                    client.query(dbAddQuery, safeValues).then(data =>{
-                        console.log("Data bas been added ", data)
-                    }).catch(error => console.log(error));
-                    let responseObject = new CityLocation(searchQuery, displayName, latitude, longitude)
-                    return responseObject;
-                } catch {
-                    console.log("Somethhing is wrong")
-                }
-
-            }).catch(error => console.log(error))
+    return checkIfExists(searchQuery).then(data =>{
+        if(data){
+            return data;
         }
-    }).catch(error => console.log(error))
-    
+        return getDataFromAPI(searchQuery).then(data => data).catch(error => console.log(error))
+    })
 }
 
+function checkIfExists(searchQuery){
+    let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
+    return client.query(dbFindQuery, [searchQuery]).then(data =>{
+        if(data.rows.length > 0){
+            return new CityLocation(data.rows[0]);
+        }
+    }).catch(error => console.log(error))
+}
+function getDataFromAPI(searchQuery){
+    let url = "https://eu1.locationiq.com/v1/search.php"
+    const query = {
+        key: process.env.GEO_CODE_KEY,
+        q: searchQuery,
+        limit: 1,
+        format: "json"
+    }
+    return superagent.get(url).query(query).then(data => {
+        try {
+            let safeValues = [searchQuery, data.body[0].display_name, data.body[0].lat, data.body[0].lon]
+            let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4) RETURNING *;`;
+            return client.query(dbAddQuery, safeValues).then(data =>{
+                return new CityLocation(data.rows[0]);
+            }).catch(error => console.log(error));
+        } catch {
+            console.log("Somethhing is wrong")
+        }
 
+    }).catch(error => console.log(error))
+}
 
 function getWeatherData(lat, lon) {
     let url = "https://api.weatherbit.io/v2.0/forecast/daily"
@@ -137,6 +153,23 @@ function getParksData(searchQuery) {
         }
     }).catch(error => console.log(error))
 }
+
+function getMoviesData(searchQuery){
+    let url = "https://api.themoviedb.org/3/search/movie";
+    const query = {
+        api_key: process.env.MOVIES_API_KEY,
+        query: searchQuery
+    }
+
+    return superagent.get(url).query(query).then(movies =>{
+        try{
+            return movies.body.results.map(movie => new Movie(movie.title, movie.overview, movie.vote_average, movie.poster_path, movie.popularity, movie.release_date))
+        } catch{
+            console.log("Something went wrong")
+        }
+    }).catch(error => console.log(error));
+}
+
 function errorHandler() {
     return {
         status: 500,
