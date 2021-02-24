@@ -95,6 +95,7 @@ function checkIfExists(searchQuery){
     let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
     return client.query(dbFindQuery, [searchQuery]).then(data =>{
         if(data.rows.length > 0){
+            console.log("FROM DATABASE")
             return new CityLocation(data.rows[0]);
         }
     }).catch(error => console.log(error))
