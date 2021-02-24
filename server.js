@@ -19,6 +19,8 @@ app.get("/weather", handleWeather);
 
 app.get("/parks", handleParks)
 
+app.get("/movies", handleMovies)
+
 app.get("*", handle404);
 
 client.connect().then(() => {
@@ -44,6 +46,14 @@ function Park(name, address, fee, description, url) {
     this.description = description;
     this.url = url;
 }
+function Movie(title, overview, average_votes, image_url, popularity, released_on){
+    this.title = title;
+    this.overview = overview;
+    this.average_votes = average_votes;
+    this.image_url = "https://image.tmdb.org/t/p/w500" + image_url;
+    this.popularity = popularity;
+    this.released_on = released_on;
+}
 
 function handleLocation(req, res) {
     try {
@@ -67,13 +77,17 @@ function handleParks(req, res) {
         res.status(200).send(data);
     })
 }
-
+function handleMovies(req, res){
+    getMoviesData(req.query.search_query).then(data =>{
+        res.status(200).send(data);
+    })
+}
 function getLocationData(searchQuery) {
     return checkIfExists(searchQuery).then(data =>{
         if(data){
             return data;
         }
-        return getDataFromAPI(searchQuery)
+        return getDataFromAPI(searchQuery).then(data => data).catch(error => console.log(error))
     })
 }
 
@@ -139,6 +153,23 @@ function getParksData(searchQuery) {
         }
     }).catch(error => console.log(error))
 }
+
+function getMoviesData(searchQuery){
+    let url = "https://api.themoviedb.org/3/search/movie";
+    const query = {
+        api_key: process.env.MOVIES_API_KEY,
+        query: searchQuery
+    }
+
+    return superagent.get(url).query(query).then(movies =>{
+        try{
+            return movies.body.results.map(movie => new Movie(movie.title, movie.overview, movie.vote_average, movie.poster_path, movie.popularity, movie.release_date))
+        } catch{
+            console.log("Something went wrong")
+        }
+    }).catch(error => console.log(error));
+}
+
 function errorHandler() {
     return {
         status: 500,
