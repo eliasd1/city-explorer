@@ -93,7 +93,7 @@ function handleMovies(req, res){
     })
 }
 function handleYelp(req,res){
-    getYelpData(req.query.search_query).then(data =>{
+    getYelpData(req.query.search_query, req.query.page).then(data =>{
         res.status(200).send(data)
     })
 }
@@ -185,10 +185,12 @@ function getMoviesData(searchQuery){
     }).catch(error => console.log(error));
 }
 
-function getYelpData(searchQuery){
+function getYelpData(searchQuery, pageNumber){
     let url = "https://api.yelp.com/v3/businesses/search"
     const query = {
-        location: searchQuery
+        location: searchQuery,
+        limit:5,
+        offset: (pageNumber - 1) * 5
     }
     return superagent.get(url).set("Authorization", `Bearer ${process.env.YELP_API_KEY}`).query(query).then(data =>{
         return data.body.businesses.map(business => new Business(business))
