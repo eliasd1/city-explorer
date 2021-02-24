@@ -69,38 +69,43 @@ function handleParks(req, res) {
 }
 
 function getLocationData(searchQuery) {
-    let searchValue = [searchQuery];
-    let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
-    return client.query(dbFindQuery, searchValue).then(data =>{
-        
-        if(data.rows.length > 0){
-            return new CityLocation(data.rows[0]);
-        } else{
-            let url = "https://eu1.locationiq.com/v1/search.php"
-            const query = {
-                key: process.env.GEO_CODE_KEY,
-                q: searchQuery,
-                limit: 1,
-                format: "json"
-            }
-            return superagent.get(url).query(query).then(data => {
-                try {
-                    let safeValues = [searchQuery, data.body[0].display_name, data.body[0].lat, data.body[0].lon]
-                    let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4) RETURNING *;`;
-                    return client.query(dbAddQuery, safeValues).then(data =>{
-                        return new CityLocation(data.rows[0]);
-                    }).catch(error => console.log(error));
-                } catch {
-                    console.log("Somethhing is wrong")
-                }
-
-            }).catch(error => console.log(error))
+    return checkIfExists(searchQuery).then(data =>{
+        if(data){
+            return data;
         }
-    }).catch(error => console.log(error))
-    
+        return getDataFromAPI(searchQuery)
+    })
 }
 
+function checkIfExists(searchQuery){
+    let dbFindQuery = `SELECT * FROM city WHERE city_name = $1;`
+    return client.query(dbFindQuery, [searchQuery]).then(data =>{
+        if(data.rows.length > 0){
+            return new CityLocation(data.rows[0]);
+        }
+    }).catch(error => console.log(error))
+}
+function getDataFromAPI(searchQuery){
+    let url = "https://eu1.locationiq.com/v1/search.php"
+    const query = {
+        key: process.env.GEO_CODE_KEY,
+        q: searchQuery,
+        limit: 1,
+        format: "json"
+    }
+    return superagent.get(url).query(query).then(data => {
+        try {
+            let safeValues = [searchQuery, data.body[0].display_name, data.body[0].lat, data.body[0].lon]
+            let dbAddQuery = `INSERT INTO city(city_name, display_name, latitude, longitude) VALUES($1,$2,$3,$4) RETURNING *;`;
+            return client.query(dbAddQuery, safeValues).then(data =>{
+                return new CityLocation(data.rows[0]);
+            }).catch(error => console.log(error));
+        } catch {
+            console.log("Somethhing is wrong")
+        }
 
+    }).catch(error => console.log(error))
+}
 
 function getWeatherData(lat, lon) {
     let url = "https://api.weatherbit.io/v2.0/forecast/daily"
