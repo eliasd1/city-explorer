@@ -8,7 +8,7 @@ let pg = require("pg");
 require("dotenv").config()
 app.use(cors());
 const PORT = process.env.PORT
-// let clientParameter = { connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } }
+
 const client = new pg.Client({ connectionString: process.env.DATABASE_URL,   ssl: { rejectUnauthorized: false } });
 
 
