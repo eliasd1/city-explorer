@@ -52,7 +52,7 @@ function Movie(movieData){
     this.title = movieData.title;
     this.overview =movieData.overview;
     this.average_votes = movieData.average_votes;
-    this.image_url = "https://image.tmdb.org/t/p/w500" + movieData.image_url;
+    this.image_url = "https://image.tmdb.org/t/p/w500" + movieData.poster_path;
     this.popularity = movieData.popularity;
     this.released_on = movieData.released_on;
 }
